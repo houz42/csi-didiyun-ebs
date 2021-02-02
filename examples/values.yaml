@@ -1,0 +1,28 @@
+config:
+  apiToken: xxxx
+
+nameOverride: csi-ebs
+
+storageClasses:
+- name: csi-ebs
+  region: gz
+  zone: gz2
+  type: SSD
+
+nodePlugins:
+- name: gz02
+  region: gz
+  zone: gz02
+  nodeSelector:
+    topology.didiyun-ebs.csi.supremind.com/zone: gz02
+
+driver:
+  image:
+    tag: master
+  resources:
+    limits:
+      cpu: 200m
+      memory: 200Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi

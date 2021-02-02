@@ -1,0 +1,131 @@
+config:
+  maxVolumesPerNode: 4
+  apiToken: ''
+  imagePullSecrets: []
+
+# nameOverride: ''
+
+rbac:
+  enabled: true
+
+# more than one storage classes could be configured
+# to create volumes in different regions, zones, or of different storage types
+storageClasses:
+- name: csi-didiyun-ebs
+  # eg: gz
+  region: ''
+  # eg: gz02
+  zone: ''
+  # SSD, or HE
+  type: SSD
+  # Retain, or Delete, default is Retain
+  reclaimPolicy: Retain
+  allowExpansion: true
+
+controller:
+  replicas: 1
+  annotations: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# volumes could be created in different regions and/or zones,
+# then more than one node plugin daemonsets may be configured.
+# daemonsets could be distinguished by nodeSelector, tolerations, or affinity
+nodePlugins:
+- name: default
+  # eg: gz
+  region: ''
+  # eg: gz02
+  zone: ''
+  annotations: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+## container images and resources
+
+driver:
+  image:
+    name: supremind/csi-didiyun-ebs
+    tag: v0.1.0
+    pullPolicy: IfNotPresent
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+provisioner:
+  image:
+    name: k8s.gcr.io/sig-storage/csi-provisioner
+    tag: v2.0.4
+    pullPolicy: IfNotPresent
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+attacher:
+  image:
+    name: k8s.gcr.io/sig-storage/csi-attacher
+    tag: v3.0.2
+    pullPolicy: IfNotPresent
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+resizer:
+  image:
+    name: k8s.gcr.io/sig-storage/csi-resizer
+    tag: v1.0.1
+    pullPolicy: IfNotPresent
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+registrar:
+  image:
+    name: k8s.gcr.io/sig-storage/csi-node-driver-registrar
+    tag: v2.0.1
+    pullPolicy: IfNotPresent
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi

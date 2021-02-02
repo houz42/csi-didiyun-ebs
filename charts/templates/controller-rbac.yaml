@@ -1,0 +1,147 @@
+{{ if .Values.rbac.enabled }}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ include "csi-didiyun-ebs.name" . }}-provisioner"
+rules:
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: 
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
+      - "patch"
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: 
+      - "get"
+      - "list"
+      - "watch"
+      - "update"
+      - "patch"
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["list", "watch", "create", "update", "patch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["csinodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ include "csi-didiyun-ebs.name" . }}-provisioner"
+subjects:
+  - kind: ServiceAccount
+    name: "{{ include "csi-didiyun-ebs.name" . }}-controller"
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: "{{ include "csi-didiyun-ebs.name" . }}-provisioner"
+  apiGroup: rbac.authorization.k8s.io
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ include "csi-didiyun-ebs.name" . }}-attacher"
+rules:
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch", "update"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["csinodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["volumeattachments"]
+    verbs: ["get", "list", "watch", "update"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ include "csi-didiyun-ebs.name" . }}-attacher"
+subjects:
+  - kind: ServiceAccount
+    name: "{{ include "csi-didiyun-ebs.name" . }}-controller"
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: "{{ include "csi-didiyun-ebs.name" . }}-attacher"
+  apiGroup: rbac.authorization.k8s.io
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "csi-didiyun-ebs.name" . }}-resizer
+rules:
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims/status"]
+    verbs: ["update", "patch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["list", "watch", "create", "update", "patch"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "csi-didiyun-ebs.name" . }}-resizer
+subjects:
+  - kind: ServiceAccount
+    name: "{{ include "csi-didiyun-ebs.name" . }}-controller"
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "csi-didiyun-ebs.name" . }}-resizer
+  apiGroup: rbac.authorization.k8s.io
+
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "csi-didiyun-ebs.name" . }}-resizer-lease
+rules:
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "watch", "list", "delete", "update", "create"]
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "csi-didiyun-ebs.name" . }}-resizer-lease
+  namespace: {{ .Release.Namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: "{{ include "csi-didiyun-ebs.name" . }}-controller"
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "csi-didiyun-ebs.name" . }}-resizer-lease
+  apiGroup: rbac.authorization.k8s.io
+
+{{ end }}

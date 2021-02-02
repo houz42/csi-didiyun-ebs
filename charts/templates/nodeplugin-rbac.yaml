@@ -1,0 +1,24 @@
+{{ if .Values.rbac.enabled }}
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ include "csi-didiyun-ebs.name" . }}-driver-registrar"
+rules:
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ include "csi-didiyun-ebs.name" . }}-driver-registrar"
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "csi-didiyun-ebs.name" . }}-node
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: "{{ include "csi-didiyun-ebs.name" . }}-driver-registrar"
+  apiGroup: rbac.authorization.k8s.io
+---
+{{ end }}
